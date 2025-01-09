@@ -1,0 +1,61 @@
+# Node.js dan npm
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+yarn.lock
+.pnp.js
+*.log
+pids/*
+
+# Lingkungan pengembangan
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Cache
+.cache/
+.coverage/
+coverage/
+dist/
+build/
+tmp/
+logs/
+sessions/
+public/
+
+# File sementara
+*.swp
+*.tmp
+*.bak
+*.orig
+Thumbs.db
+DS_Store
+
+# File dan folder khusus Fastify
+.fastifyrc
+
+# File log lainnya
+*.log
+access.log
+error.log
+combined.log
+
+# Debug tools
+*.map
+
+# File konfigurasi database (contoh)
+db.json
+db.sqlite
+db.sql
+db.js
+
+# File cache lainnya
+*.cache
+
+# Folder sementara lainnya
+temp/
+cache/
