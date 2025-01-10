@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const enrollSchema = new mongoose.Schema({
   appName: { type: String, required: true },
   version: { type: String, required: true },
