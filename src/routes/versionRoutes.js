@@ -14,7 +14,8 @@ module.exports = async function (fastify) {
   fastify.get("/versions/v2/detail", async (request, reply) => {
     const { appName, abi } = request.query;
     const versions = await Version.findOne({ appName });
-    versions.downloadLink = `http://103.150.191.156/downloads/${appName}/${abi}.apk`;
+    const baseFileServerURL = process.env.BASE_FILE_SERVER_URL;
+    versions.downloadLink = `${baseFileServerURL}/${appName}/${abi}.apk`;
     reply.send(versions);
   });
   fastify.delete(
