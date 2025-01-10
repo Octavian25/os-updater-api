@@ -44,6 +44,7 @@ module.exports = async function (fastify) {
 
       // Cari data enroll berdasarkan fingerprint perangkat
       const existingEnroll = await Enroll.findOne({
+        appName,
         "deviceInfo.fingerprint": deviceInfo.fingerprint,
       });
 
