@@ -65,6 +65,7 @@ app.decorate("authorize", (roles) => async (request, reply) => {
 // Routes
 app.register(require("./routes/versionRoutes"));
 app.register(require("./routes/authRoutes"));
+app.register(require("./routes/enrollRoutes"));
 
 mongoose.connection.on("connected", () => {
   console.log("MongoDB connected successfully.");

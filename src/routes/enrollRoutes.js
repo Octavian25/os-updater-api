@@ -6,34 +6,34 @@ module.exports = async function (fastify) {
     const appsKey = request.headers["x-apps-key"]; // Ambil APPS_KEY dari header
     const requestTime = request.headers["x-request-time"]; // Waktu request dari aplikasi
     const maxTimeDifference = 5000; // Maksimal selisih waktu dalam milidetik (5 detik)
-
+  
     // Validasi APPS_KEY
     if (!appsKey || appsKey !== process.env.APPS_KEY) {
       return reply.code(403).send({ error: "Invalid or missing APPS_KEY" });
     }
-
+  
     // Validasi waktu request
     if (!requestTime) {
       return reply.code(400).send({ error: "Missing x-request-time header" });
     }
-
+  
     const currentTime = Date.now(); // Waktu server dalam milidetik
     const requestTimeMillis = parseInt(requestTime, 10); // Konversi waktu request ke milidetik
-
+  
     if (isNaN(requestTimeMillis)) {
       return reply.code(400).send({ error: "Invalid x-request-time format" });
     }
-
+  
     const timeDifference = Math.abs(currentTime - requestTimeMillis); // Selisih waktu
-
+  
     if (timeDifference > maxTimeDifference) {
       return reply
         .code(408) // HTTP Status 408: Request Timeout
         .send({ error: "Request time difference exceeds the allowed limit" });
     }
-
+  
     const { appName, version, deviceInfo, androidVersion } = request.body;
-
+  
     try {
       if (!appName || !version || !deviceInfo?.fingerprint || !androidVersion) {
         return reply.code(400).send({
@@ -41,22 +41,29 @@ module.exports = async function (fastify) {
             "appName, version, deviceInfo.fingerprint, and androidVersion are required",
         });
       }
-
-      // Cek apakah data enroll sudah ada berdasarkan fingerprint
+  
+      // Cari data enroll berdasarkan fingerprint perangkat
       const existingEnroll = await Enroll.findOne({
-        appName,
-        version,
         "deviceInfo.fingerprint": deviceInfo.fingerprint,
       });
-
+  
       if (existingEnroll) {
+        // Perbarui data dengan versi terbaru
+        existingEnroll.appName = appName;
+        existingEnroll.version = version;
+        existingEnroll.enrolledAt = new Date();
+        existingEnroll.deviceInfo = deviceInfo;
+        existingEnroll.androidVersion = androidVersion;
+  
+        await existingEnroll.save();
+  
         return reply.code(200).send({
-          message: "Enroll already exists",
+          message: "Version updated successfully",
           data: existingEnroll,
         });
       }
-
-      // Simpan data enroll baru
+  
+      // Simpan data baru jika tidak ada
       const newEnroll = new Enroll({
         appName,
         version,
@@ -64,20 +71,17 @@ module.exports = async function (fastify) {
         deviceInfo,
         androidVersion,
       });
-
+  
       await newEnroll.save();
-
+  
       reply.send({ message: "Version enrolled successfully", data: newEnroll });
     } catch (err) {
-      if (err.code === 11000) {
-        return reply.code(200).send({ message: "Enroll already exists" });
-      }
-
       reply
         .code(500)
         .send({ error: "Failed to enroll version", details: err.message });
     }
   });
+  
 
   // Endpoint untuk mendapatkan data analitik enroll
   fastify.get("/enroll/analytics", async (request, reply) => {
